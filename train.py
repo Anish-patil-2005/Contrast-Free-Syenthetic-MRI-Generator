@@ -13,7 +13,7 @@ from monai.data import Dataset, DataLoader
 # --- CONFIGURATION ---
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Using absolute path to avoid any confusion
-TRAIN_PATH = "C:\Full Stack Development\Contrast_Free_Syenthetic_MRI\data\raw\train"
+TRAIN_PATH = r"C:\Full Stack Development\Contrast_Free_Syenthetic_MRI\data\raw\train"
 MODEL_SAVE_PATH = "./models/contrast_free_diffusion.pth"
 
 os.makedirs("./models", exist_ok=True)
@@ -68,7 +68,7 @@ def train():
     print(f"🚀 Training starting on: {DEVICE}")
     loader = get_loader()
 
-    for epoch in range(10):
+    for epoch in range(100):
         for i, batch in enumerate(loader):
             # We train on 2D slices to save memory
             # Slice 70 is usually the center of the brain volume
