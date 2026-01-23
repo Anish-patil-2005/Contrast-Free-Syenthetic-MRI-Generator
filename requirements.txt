@@ -1,0 +1,17 @@
+# Core AI Engine
+torch
+torchvision
+torchaudio
+
+# Medical Imaging Framework
+monai
+einops
+
+# File Handlers (MRI Formats)
+nibabel
+SimpleITK
+
+# Visualization and Math
+matplotlib
+numpy
+scipy

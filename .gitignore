@@ -1,0 +1,20 @@
+# Python environment
+venv/
+__pycache__/
+*.pyc
+
+# Data (Too large for GitHub)
+data/raw/
+data/processed/
+
+# Models (Keep these if they are <100MB, otherwise ignore)
+# models/contrast_free_diffusion.pth
+
+# Results/Plots
+*.png
+test_result.png
+quick_test.png
+
+# System files
+.DS_Store
+Thumbs.db
