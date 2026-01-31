@@ -64,19 +64,28 @@ scheduler = DDPMScheduler(num_train_timesteps=250)
 scheduler.set_timesteps(250)
 
 # ================= DIFFUSION SAMPLING =================
-with torch.no_grad():
-    sample = torch.randn_like(real)
+print(f"🧠 AI is generating Synthetic T1-Gd for {patient}...")
 
-    for t in scheduler.timesteps:
-        t_tensor = torch.tensor([t], device=DEVICE)
+with torch.no_grad():
+    sample = torch.randn_like(real).to(DEVICE)
+
+    # Get total steps for the display
+    total_steps = len(scheduler.timesteps)
+
+    for i, t in enumerate(scheduler.timesteps):
+        t_tensor = torch.tensor([t], device=DEVICE).long()
 
         model_input = torch.cat([inputs, sample], dim=1)
         noise_pred = model(model_input, t_tensor)
 
-        # MONAI older version returns tuple
-        sample = scheduler.step(noise_pred, t, sample)[1]
+        output = scheduler.step(noise_pred, t, sample)
+        sample = output[0] if isinstance(output, tuple) else output.prev_sample
+
+        # \r moves the cursor to the start of the line, end="" prevents a new line
+        print(f"   ➔ Denoising Step: {i+1}/{total_steps} (Timestep: {t.item()})", end="\r")
 
 fake = sample
+print(f"\n✅ Generation Complete! Processed {total_steps} steps.")
 
 # ================= NORMALIZATION =================
 fake = (fake - fake.min()) / (fake.max() - fake.min())
