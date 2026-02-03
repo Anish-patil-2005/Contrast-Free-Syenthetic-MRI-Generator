@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from monai.networks.nets import DiffusionModelUNet
 from monai.networks.schedulers.ddpm import DDPMScheduler
-# Ensure your training script is in the same folder to import 'prep'
 from train import prep, DEVICE 
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
@@ -29,7 +28,7 @@ model.eval()
 scheduler = DDPMScheduler(num_train_timesteps=250)
 
 # Load first patient from test set
-patient = [f for f in os.listdir(TEST_PATH) if f.startswith("Mets_")][0]
+patient = [f for f in os.listdir(TEST_PATH) if f.startswith("Mets_")][5]
 p_path = os.path.join(TEST_PATH, patient)
 data = {"t1": os.path.join(p_path, "t1_pre.nii.gz"), 
         "flair": os.path.join(p_path, "flair.nii.gz"),
@@ -69,81 +68,81 @@ mean_synthetic = np.mean(all_runs, axis=0)
 # Step 2: Standard Deviation (The Uncertainty Map)
 uncertainty_map = np.std(all_runs, axis=0)
 
-# # ================= 5. VISUALIZATION =================
-# plt.figure(figsize=(16, 5))
+# ================= 5. VISUALIZATION =================
+plt.figure(figsize=(16, 5))
 
-# plt.subplot(1, 4, 1)
-# plt.title("Input T1")
-# plt.imshow(inputs[0, 0].cpu(), cmap="gray")
-# plt.axis("off")
-
-# plt.subplot(1, 4, 2)
-# plt.title("Synthetic T1-Gd (Mean)")
-# plt.imshow(mean_synthetic, cmap="gray")
-# plt.axis("off")
-
-# plt.subplot(1, 4, 3)
-# plt.title("Uncertainty Map (Std Dev)")
-# # We use 'hot' colormap to make high-variance areas look like a heatmap
-# plt.imshow(uncertainty_map, cmap="hot")
-# plt.colorbar(label="Uncertainty Level")
-# plt.axis("off")
-
-# plt.subplot(1, 4, 4)
-# plt.title("Ground Truth")
-# plt.imshow(real[0, 0].cpu(), cmap="gray")
-# plt.axis("off")
-
-# plt.tight_layout()
-# plt.savefig("uncertainty_result.png")
-# print("✅ Uncertainty map saved as uncertainty_result.png")
-# plt.show()
-
-
-
-# --- 1. Calculate Error Map ---
-real_np = real[0, 0].cpu().numpy()
-error_map = np.abs(mean_synthetic - real_np)
-
-# --- 2. Calculate Metrics ---
-# We normalize to [0,1] for standard metric calculation
-data_range = real_np.max() - real_np.min()
-val_ssim = ssim(real_np, mean_synthetic, data_range=data_range)
-val_psnr = psnr(real_np, mean_synthetic, data_range=data_range)
-
-print(f"\n📊 CLINICAL METRICS:")
-print(f"   ➤ SSIM: {val_ssim:.4f} (Higher is better, max 1.0)")
-print(f"   ➤ PSNR: {val_psnr:.2f} dB (Higher is better)")
-
-# --- 3. Professional 5-Panel Display ---
-plt.figure(figsize=(20, 5))
-
-plt.subplot(1, 5, 1)
+plt.subplot(1, 4, 1)
 plt.title("Input T1")
 plt.imshow(inputs[0, 0].cpu(), cmap="gray")
 plt.axis("off")
 
-plt.subplot(1, 5, 2)
-plt.title("Synthetic (Mean)")
+plt.subplot(1, 4, 2)
+plt.title("Synthetic T1-Gd (Mean)")
 plt.imshow(mean_synthetic, cmap="gray")
 plt.axis("off")
 
-plt.subplot(1, 5, 3)
-plt.title("Ground Truth")
-plt.imshow(real_np, cmap="gray")
-plt.axis("off")
-
-plt.subplot(1, 5, 4)
-plt.title("Uncertainty (AI Doubt)")
+plt.subplot(1, 4, 3)
+plt.title("Uncertainty Map (Std Dev)")
+# We use 'hot' colormap to make high-variance areas look like a heatmap
 plt.imshow(uncertainty_map, cmap="hot")
-plt.colorbar(fraction=0.046, pad=0.04)
+plt.colorbar(label="Uncertainty Level")
 plt.axis("off")
 
-plt.subplot(1, 5, 5)
-plt.title("Error Map (AI vs Real)")
-plt.imshow(error_map, cmap="inferno") # Inferno clearly shows intensity misses
-plt.colorbar(fraction=0.046, pad=0.04)
+plt.subplot(1, 4, 4)
+plt.title("Ground Truth")
+plt.imshow(real[0, 0].cpu(), cmap="gray")
 plt.axis("off")
 
 plt.tight_layout()
+plt.savefig("uncertainty_result.png")
+print("✅ Uncertainty map saved as uncertainty_result.png")
 plt.show()
+
+
+
+# # --- 1. Calculate Error Map ---
+# real_np = real[0, 0].cpu().numpy()
+# error_map = np.abs(mean_synthetic - real_np)
+
+# # --- 2. Calculate Metrics ---
+# # We normalize to [0,1] for standard metric calculation
+# data_range = real_np.max() - real_np.min()
+# val_ssim = ssim(real_np, mean_synthetic, data_range=data_range)
+# val_psnr = psnr(real_np, mean_synthetic, data_range=data_range)
+
+# print(f"\n📊 CLINICAL METRICS:")
+# print(f"   ➤ SSIM: {val_ssim:.4f} (Higher is better, max 1.0)")
+# print(f"   ➤ PSNR: {val_psnr:.2f} dB (Higher is better)")
+
+# # --- 3. Professional 5-Panel Display ---
+# plt.figure(figsize=(20, 5))
+
+# plt.subplot(1, 5, 1)
+# plt.title("Input T1")
+# plt.imshow(inputs[0, 0].cpu(), cmap="gray")
+# plt.axis("off")
+
+# plt.subplot(1, 5, 2)
+# plt.title("Synthetic (Mean)")
+# plt.imshow(mean_synthetic, cmap="gray")
+# plt.axis("off")
+
+# plt.subplot(1, 5, 3)
+# plt.title("Ground Truth")
+# plt.imshow(real_np, cmap="gray")
+# plt.axis("off")
+
+# plt.subplot(1, 5, 4)
+# plt.title("Uncertainty (AI Doubt)")
+# plt.imshow(uncertainty_map, cmap="hot")
+# plt.colorbar(fraction=0.046, pad=0.04)
+# plt.axis("off")
+
+# plt.subplot(1, 5, 5)
+# plt.title("Error Map (AI vs Real)")
+# plt.imshow(error_map, cmap="inferno") # Inferno clearly shows intensity misses
+# plt.colorbar(fraction=0.046, pad=0.04)
+# plt.axis("off")
+
+# plt.tight_layout()
+# plt.show()
