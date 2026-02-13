@@ -7,6 +7,8 @@
 
 This project uses a **Diffusion Model (U-Net)** to generate synthetic **T1-Contrast (T1-Gd)** MRI images from non-contrast sequences (**T1, FLAIR, and BRAVO**). The goal is to produce medical-grade synthetic enhancement without the need for injecting gadolinium contrast agents.
 
+* Live at :  https://huggingface.co/spaces/anishpatil/neuro-synth-ai
+
 ---
 
 ## 🛠️ Setup Instructions
