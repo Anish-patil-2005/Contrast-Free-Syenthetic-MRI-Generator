@@ -26,7 +26,7 @@ prep = Compose([
 ])
 
 # ================= LOAD ONE PATIENT =================
-patient = [f for f in os.listdir(TEST_PATH) if f.startswith("Mets_")][0]
+patient = [f for f in os.listdir(TEST_PATH) if f.startswith("Mets_")][5]
 p = os.path.join(TEST_PATH, patient)
 
 data = [{

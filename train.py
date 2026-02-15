@@ -10,6 +10,8 @@ from monai.transforms import (
     ScaleIntensityd, Resized, ToTensord, ConcatItemsd
 )
 from monai.data import Dataset, DataLoader
+from monai.losses import SSIMLoss
+ssim_loss_fn = SSIMLoss(spatial_dims=2, data_range=1.0)
 
 # ================= PERFORMANCE =================
 torch.backends.cudnn.benchmark = True
@@ -74,7 +76,7 @@ scheduler.alphas_cumprod = scheduler.alphas_cumprod.to(DEVICE)
 
 
 
-optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
+optimizer = torch.optim.Adam(model.parameters(), lr=2e-5)
 scaler = GradScaler("cuda")
 
 # resume
@@ -86,7 +88,7 @@ if os.path.exists(MODEL_SAVE_PATH):
 def train():
     loader = get_loader()
 
-    for epoch in range(20):
+    for epoch in range(40):
 
         for i,batch in enumerate(loader):
 
@@ -105,9 +107,22 @@ def train():
             optimizer.zero_grad(set_to_none=True)
 
             with autocast("cuda"):
-                pred = model(model_input,t)
-                x0 = scheduler.step(pred, t, noisy)[0]
-                loss = F.mse_loss(pred, noise) + 0.01 * F.l1_loss(x0, target)
+                pred = model(model_input, t)
+
+                loss_noise = F.mse_loss(pred, noise)
+
+                alpha_bar = scheduler.alphas_cumprod[t].view(-1,1,1,1)
+                sqrt_alpha_bar = torch.sqrt(alpha_bar)
+                sqrt_one_minus_alpha_bar = torch.sqrt(1 - alpha_bar)
+
+                x0 = (noisy - sqrt_one_minus_alpha_bar * pred) / sqrt_alpha_bar
+
+                loss_l1 = F.l1_loss(x0, target)
+                loss_ssim = ssim_loss_fn(x0, target)
+
+                loss = loss_noise + 0.5 * loss_l1 + 0.2 * loss_ssim
+
+
 
 
             scaler.scale(loss).backward()
